@@ -15,8 +15,14 @@ class TestRhinoAPI(unittest.TestCase):
     def test_ingestible_get(self):
         ret = self.r.ingestible(verbose=True)
         print("INGESTIBLE DOIS: %s" % ret)
+
+    def test_ingest_zip(self):
+        with self.assertRaises(Rhyno.ArticleAlreadyExists):
+            self.r.ingest_zip(TEST_PACKAGE_FILENAME, verbose=True)
+            
+        self.r.ingest_zip(TEST_PACKAGE_FILENAME, force_reingest=True, verbose=True)
         
-    def test_ingestible_post(self):
+
         
         
 if __name__ == '__main__':
