@@ -6,6 +6,11 @@ class Rhyno(object):
     def __init__(self, host):
         self.host = host
 
+    '''EXCEPTIONS'''
+    class ArticleAlreadyExists(Exception):
+        def __init__(self, message):
+            Exception.__init__(self, "Article is already ingested. %s" % message)
+
     def ingestible(self, verbose=False):
         '''
         returns list of ingestible DOIs as unicode
@@ -25,12 +30,9 @@ class Rhyno(object):
             }
         if force_reingest:
             payload['force_reingest'] = True
-        if file:
-            #handle the file
-            pass
 
-        print("Am I really posting?")
         r = requests.post(self.host + '/ingestible', data=payload, verify=False)
+
         if verbose:
             print(utils.report("POST /ingestible/ %s"% pretty_dict_repr(payload), r))
         return r.content
@@ -51,20 +53,22 @@ class Rhyno(object):
         r = requests.post(self.host + '/zip/', files=files, data=payload, verify=False)
 
         if verbose:
-            print(utils.report("POST /zip/ %s"% pretty_dict_repr(files), r))
-        return r
+            print(utils.report("POST /zip/ %s"% utils.pretty_dict_repr(files), r))
         
+        if r.status_code == 405:
+            raise self.ArticleAlreadyExists('')
+        return json.loads(r.content)
 
     def get_article(self, doi, verbose=False):
         r = requests.get(self.host + '/article/' + doi, verify=False)
         if verbose:
             print(utils.report("GET /ingestible/%s" % doi, r))
         
-        return r.content
+        return json.loads(r.content)
 
     def get_article_state(self, doi, verbose=False):
         r = requests.get(self.host + '/article/state/' + doi, verify=False)
         if verbose:
             print(utils.report("GET /article/state/%s" % doi, r))
 
-        return r.content
+        return json_loads(r.content)
