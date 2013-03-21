@@ -30,9 +30,9 @@ def report(description, response):
     print("%s %s" % (response.request.method, response.request.url))
     print('Headers:', pretty_dict_repr(response.request.headers))
     try:
-        print('Request size:', len(response.request.data))
-        print(response.request.data)
-    except AttributeError:
+        print('Request size:', len(response.request.body))
+        print(response.request.body[:600])
+    except TypeError, e:
         pass
     try:
         print('Files:', pretty_dict_repr(response.request.files))
