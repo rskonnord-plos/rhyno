@@ -48,7 +48,7 @@ class Rhyno(object):
         if verbose:
             print(utils.report("POST /ingestible/ %s"% pretty_dict_repr(payload), r))
 
-        self.handle_error_codes(r.status_code)
+        self.handle_error_codes(r)
         return r.content
 
     def ingest_zip(self, archive_name, force_reingest=False, verbose=False):
