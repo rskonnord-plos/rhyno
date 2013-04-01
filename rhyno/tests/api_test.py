@@ -14,8 +14,8 @@ class TestRhinoAPI(unittest.TestCase):
     def setUp(self):     
         self.r = Rhyno(API_HOST)
     
-    def test_ingestible_get(self):
-        ret = self.r.ingestible(verbose=True)
+    def test_ingestibles_get(self):
+        ret = self.r.ingestibles(verbose=True)
 
     def test_ingest_zip(self):
         with self.assertRaises(Rhyno.Base405Error):
