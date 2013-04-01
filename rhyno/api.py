@@ -74,16 +74,16 @@ class Rhyno(object):
         return json.loads(r.content)
 
     def get_metadata(self, doi, verbose=False):
-        r = requests.get(self.host + '/article/' + doi, verify=self.verify_ssl)
+        r = requests.get(self.host + '/articles/' + doi, verify=self.verify_ssl)
         if verbose:
-            print(utils.report("GET /article/%s" % doi, r))
+            print(utils.report("GET /articles/%s" % doi, r))
         self.handle_error_codes(r)        
         return json.loads(r.content)
 
     def _get_state(self, doi, verbose=False):
-        r = requests.get(self.host + '/article/state/' + doi, verify=self.verify_ssl)
+        r = requests.get(self.host + '/articles/%s?state' % doi, verify=self.verify_ssl)
         if verbose:
-            print(utils.report("GET /article/state/%s" % doi, r))
+            print(utils.report("GET /articles/%s?state" % doi, r))
         self.handle_error_codes(r)
         return json.loads(r.content)
     
@@ -103,9 +103,9 @@ class Rhyno(object):
             'pmcSyndicationState': 'PENDING',
             'published': publish
             }
-        r = requests.put(self.host + '/article/state/' + doi, data=json.dumps(payload), verify=self.verify_ssl)
+        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
         if verbose:
-            print(utils.report("POST /article/state/" + doi, r))
+            print(utils.report("POST /articles/%s?state" % doi, r))
         self.handle_error_codes(r) 
         return json.loads(r.content)
 
@@ -121,9 +121,9 @@ class Rhyno(object):
             'pmcSyndicationState': 'IN_PROGRESS',
             'published': True
             }
-        r = requests.put(self.host + '/article/state/' + doi, data=json.dumps(payload), verify=self.verify_ssl)
+        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
         if verbose:
-            print(utils.report("POST /article/state/" + doi, r))
+            print(utils.report("POST /articles/%s?state" % doi, r))
         self.handle_error_codes(r) 
         return json.loads(r.content)
 
@@ -133,8 +133,8 @@ class Rhyno(object):
             'pmcSyndicationState': 'PENDING',
             'published': True
             }
-        r = requests.put(self.host + '/article/state/' + doi, data=json.dumps(payload), verify=self.verify_ssl)
+        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
         if verbose:
-            print(utils.report("POST /article/state/" + doi, r))
+            print(utils.report("POST /articles/%s?state" % doi, r))
         self.handle_error_codes(r) 
         return json.loads(r.content)
