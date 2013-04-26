@@ -81,31 +81,32 @@ class Rhyno(object):
         return json.loads(r.content)
 
     def _get_state(self, doi, verbose=False):
-        r = requests.get(self.host + '/articles/%s?state' % doi, verify=self.verify_ssl)
+        r = requests.get(self.host + '/articles/%s' % doi, verify=self.verify_ssl)
         if verbose:
-            print(utils.report("GET /articles/%s?state" % doi, r))
+            print(utils.report("GET /articles/%s" % doi, r))
         self.handle_error_codes(r)
         return json.loads(r.content)
     
     def is_published(self, doi, verbose=False):
         return self._get_state(doi, verbose)['published']
 
+    def _get_syndication_state(self, doi, target, verbose=False):
+        return self._get_state(doi, verbose)['syndications'][target]['status']
+
     def get_crossref_syndication_state(self, doi, verbose=False):
-        return self._get_state(doi, verbose)['crossRefSyndicationState']
+        return self._get_syndication_state(doi, 'CROSSREF', verbose=verbose)
 
     def get_pmc_syndication_state(self, doi, verbose=False):
-        return self._get_state(doi, verbose)['pmcSyndicationState']
+        return self._get_syndication_state(doi, 'PMC', verbose=verbose)
 
     def _base_publish(self, doi, publish, verbose=False):
-        #'PENDING' has no effect on syndication
+        # has no effect on syndication because 'syndications' key is omitted
         payload = {
-            'crossRefSynicationState': 'PENDING',
-            'pmcSyndicationState': 'PENDING',
-            'published': publish
+            'state': 'published'
             }
-        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
+        r = requests.patch(self.host + '/articles/%s' % doi, data=json.dumps(payload), verify=self.verify_ssl)
         if verbose:
-            print(utils.report("POST /articles/%s?state" % doi, r))
+            print(utils.report("POST /articles/%s" % doi, r))
         self.handle_error_codes(r) 
         return json.loads(r.content)
 
@@ -115,26 +116,20 @@ class Rhyno(object):
     def unpublish(self, doi, verbose=False):
         self._base_publish(doi, publish=False, verbose=verbose)
 
-    def syndicate_pmc(self, doi, verbose=False):
+    def _syndicate(self, doi, targets, verbose=False):
         payload = {
-            'crossRefSynicationState': 'PENDING',
-            'pmcSyndicationState': 'IN_PROGRESS',
-            'published': True
+            'syndications': dict(
+                (target, {'status': 'IN_PROGRESS'})
+                for target in targets)
             }
-        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
+        r = requests.patch(self.host + '/articles/%s' % doi, data=json.dumps(payload), verify=self.verify_ssl)
         if verbose:
-            print(utils.report("POST /articles/%s?state" % doi, r))
+            print(utils.report("PATCH /articles/%s" % doi, r))
         self.handle_error_codes(r) 
         return json.loads(r.content)
 
+    def syndicate_pmc(self, doi, verbose=False):
+        return self._syndicate(doi, ['PMC'], verbose=verbose)
+
     def syndicate_crossref(self, doi, verbose=False):
-        payload = {
-            'crossRefSynicationState': 'IN_PROGRESS',
-            'pmcSyndicationState': 'PENDING',
-            'published': True
-            }
-        r = requests.put(self.host + '/articles/%s?state' % doi, data=json.dumps(payload), verify=self.verify_ssl)
-        if verbose:
-            print(utils.report("POST /articles/%s?state" % doi, r))
-        self.handle_error_codes(r) 
-        return json.loads(r.content)
+        return self._syndicate(doi, ['CROSSREF'], verbose=verbose)
