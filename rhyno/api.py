@@ -33,20 +33,20 @@ class Rhyno(object):
 
     def ingestibles(self, verbose=False):
         '''
-        returns list of ingestible DOIs as unicode
+        returns list of ingestible filenames as unicode
         '''
         r = requests.get(self.host + '/ingestibles/', verify=self.verify_ssl)
         if verbose:
             print(utils.report("GET /ingestibles/", r))
         return json.loads(r.content)
 
-    def ingest(self, doi, force_reingest=None, verbose=False):
+    def ingest(self, filename, force_reingest=None, verbose=False):
         '''
-        attempts to ingest ingestible article by DOI
+        attempts to ingest ingestible article by package filename
         returns article metadata dict if successful
         '''
         payload = {
-            'doi': doi
+            'name': filename
             }
         if force_reingest:
             payload['force_reingest'] = True
